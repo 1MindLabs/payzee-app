@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,7 +7,11 @@ import 'package:intl/intl.dart';
 import 'package:upi_pay/core/provider/locale_provider.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/transaction_history.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/utility_cards.dart';
+import 'package:upi_pay/features/user/dashboard/data/models/user_profile.dart';
+import 'package:upi_pay/features/user/dashboard/data/services/profile_service.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/providers/user_profile_provider.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/screens/map_screen.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/screens/wallet_summary_screen.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/choose_payment_option_bottom_sheet.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/confetti_card.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/language_menu.dart';
@@ -21,6 +27,53 @@ class DashboardScreen extends ConsumerStatefulWidget {
 }
 
 class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  final ProfileService profileService = ProfileService();
+
+  @override
+  void initState() {
+    super.initState();
+    loadProfile();
+  }
+
+  void updateUtilityCards(UserProfile userProfile) {
+    log('Updating utility cards with user profile data');
+    log('User Profile: $userProfile');
+    final govtCardIndex = 0;
+    if (govtCardIndex == 0) {
+      utilityCards[govtCardIndex] = utilityCards[govtCardIndex].copyWith(
+        allocated: double.tryParse(userProfile.govtWallet.toString()) ?? 0,
+        remaining: double.tryParse(userProfile.remainingAmt.toString()) ?? 0,
+      );
+    }
+
+    log('govt card: ${utilityCards[govtCardIndex]}');
+
+    final personalCardIndex = 1;
+    if (personalCardIndex == 1) {
+      utilityCards[personalCardIndex] = utilityCards[personalCardIndex]
+          .copyWith(
+            allocated:
+                double.tryParse(userProfile.personalWallet.toString()) ?? 0,
+            remaining:
+                double.tryParse(userProfile.personalWallet.toString()) ?? 0,
+          );
+    }
+
+    setState(() {});
+  }
+
+  Future<void> loadProfile() async {
+    await ref
+        .read(userProfileProvider.notifier)
+        .updateUserProfile(profileService);
+
+    final userProfile = ref.watch(userProfileProvider);
+    log('User profile fetched in screen: $userProfile');
+    if (userProfile != null) {
+      updateUtilityCards(userProfile);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final totalAllocated = utilityCards.fold<double>(
@@ -61,7 +114,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: PageView.builder(
               controller: PageController(viewportFraction: 0.85),
               itemCount: utilityCards.length,
-              itemBuilder: (_, i) => ConfettiCard(card: utilityCards[i]),
+              itemBuilder:
+                  (_, i) => GestureDetector(
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => WalletSummaryScreen(idx: i),
+                          ),
+                        ),
+                    child: ConfettiCard(card: utilityCards[i]),
+                  ),
             ),
           ),
 
@@ -138,9 +201,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: ()=> Navigator.push(context, MaterialPageRoute(
-                      builder: (context) => const MapScreen(),
-                    )),
+                    onTap:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MapScreen(),
+                          ),
+                        ),
                     child: WalletFunctions(
                       icon: Icons.pin_drop_rounded,
                       title: AppLocalizations.of(context)!.map,
