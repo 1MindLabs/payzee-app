@@ -13,7 +13,21 @@ class LanguageSelectionSheet extends ConsumerWidget {
       shrinkWrap: true,
       children: [
         ListTile(
-          leading: const Text('🇬🇧'),
+          leading:  Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black,
+            ),
+            child: Text(
+              getLanguageLetter(locale!),
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           title: const Text('English'),
           selected: locale!.languageCode == 'en',
           onTap: () {
@@ -41,5 +55,18 @@ class LanguageSelectionSheet extends ConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+String getLanguageLetter(Locale locale) {
+  switch (locale.languageCode) {
+    case 'en':
+      return 'A'; // English
+    case 'hi':
+      return 'ह'; // Hindi
+    case 'kn':
+      return 'ಕ'; // Kannada
+    default:
+      return 'E'; // fallback
   }
 }
