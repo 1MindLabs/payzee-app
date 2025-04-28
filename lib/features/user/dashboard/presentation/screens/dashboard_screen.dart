@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:upi_pay/core/provider/locale_provider.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/transaction_history.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/utility_cards.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/screens/map_screen.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/choose_payment_option_bottom_sheet.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/confetti_card.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/language_menu.dart';
@@ -136,9 +137,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  WalletFunctions(
-                    icon: Icons.pin_drop_rounded,
-                    title: AppLocalizations.of(context)!.map,
+                  GestureDetector(
+                    onTap: ()=> Navigator.push(context, MaterialPageRoute(
+                      builder: (context) => const MapScreen(),
+                    )),
+                    child: WalletFunctions(
+                      icon: Icons.pin_drop_rounded,
+                      title: AppLocalizations.of(context)!.map,
+                    ),
                   ),
                   WalletFunctions(
                     icon: Icons.generating_tokens_rounded,

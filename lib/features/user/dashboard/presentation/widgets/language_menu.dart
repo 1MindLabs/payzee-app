@@ -13,14 +13,14 @@ class LanguageSelectionSheet extends ConsumerWidget {
       shrinkWrap: true,
       children: [
         ListTile(
-          leading:  Container(
+          leading: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.black,
             ),
             child: Text(
-              getLanguageLetter(locale!),
+              getLanguageLetter('en'),
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18,
@@ -36,7 +36,22 @@ class LanguageSelectionSheet extends ConsumerWidget {
           },
         ),
         ListTile(
-          leading: const Text('🇮🇳'),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black,
+            ),
+            child: Text(
+              getLanguageLetter('hi'),
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           title: const Text('Hindi'),
           selected: locale.languageCode == 'hi',
           onTap: () {
@@ -45,7 +60,23 @@ class LanguageSelectionSheet extends ConsumerWidget {
           },
         ),
         ListTile(
-          leading: const Text('🇮🇳'),
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black,
+            ),
+            child: Text(
+              getLanguageLetter('kn'),
+              textAlign: TextAlign.center,
+
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
           title: const Text('Kannada'),
           selected: locale.languageCode == 'kn',
           onTap: () {
@@ -58,8 +89,8 @@ class LanguageSelectionSheet extends ConsumerWidget {
   }
 }
 
-String getLanguageLetter(Locale locale) {
-  switch (locale.languageCode) {
+String getLanguageLetter(String s) {
+  switch (s) {
     case 'en':
       return 'A'; // English
     case 'hi':

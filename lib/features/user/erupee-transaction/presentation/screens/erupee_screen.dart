@@ -1,16 +1,19 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:upi_pay/core/provider/erupee_provider.dart';
 import 'package:upi_pay/features/user/erupee-transaction/presentation/widgets/e_rupee_note.dart';
+import 'package:upi_pay/features/user/payment/presentation/screens/payment_screen.dart';
 
-class NoteCarouselScreen extends StatefulWidget {
+class NoteCarouselScreen extends ConsumerStatefulWidget {
   const NoteCarouselScreen({super.key});
   @override
   _NoteCarouselScreenState createState() => _NoteCarouselScreenState();
 }
 
-class _NoteCarouselScreenState extends State<NoteCarouselScreen>
+class _NoteCarouselScreenState extends ConsumerState<NoteCarouselScreen>
     with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController(viewportFraction: 0.7);
   final List<int> _denominations = [2, 5, 10, 20, 50, 100, 200, 500, 2000];
@@ -258,15 +261,10 @@ class _NoteCarouselScreenState extends State<NoteCarouselScreen>
                 elevation: 4,
               ),
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: Colors.grey[900],
-                    content: Text(
-                      'Loading e₹ ${_totalLoaded.toStringAsFixed(0)}',
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    duration: const Duration(seconds: 2),
-                  ),
+                ref.read(eruppeProvider.notifier).state = _totalLoaded;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PaymentScreen()),
                 );
               },
               child: const Text(
