@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:upi_pay/features/user/dashboard/data/models/utility_card.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:upi_pay/l10n/l10n_extension.dart';
 
 class ConfettiCard extends StatelessWidget {
   final UtilityCard card;
@@ -63,7 +65,7 @@ class ConfettiCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    card.name,
+                    AppLocalizations.of(context)!.translateUtilityName(card.name, context),
                     style: GoogleFonts.roboto(
                       color: Colors.white,
                       fontSize: 20,
@@ -72,7 +74,7 @@ class ConfettiCard extends StatelessWidget {
                   ),
                   Spacer(),
                   Text(
-                    'Remaining Balance',
+                    AppLocalizations.of(context)!.remainingBalance,
                     style: GoogleFonts.roboto(
                       color: Colors.white70,
                       fontSize: 14,

@@ -1,0 +1,23 @@
+{
+  "@@locale": "kn",
+  "appTitle": "ನನ್ನ ಈರೂಪಿ ವಾಲೆಟ್",
+  "govtSubsidyWallet": "ಸರ್ಕಾರಿ ಸಬ್ಸಿಡಿ ವಾಲೆಟ್",
+  "personalERupeeWallet": "ವೈಯಕ್ತಿಕ ಇ-ರೂಪಿ ಪರ್ಸ್",
+  "remainingBalance": "ಉಳಿದ ಶಿಲ್ಕು",
+  "totalAllocated": "ಒಟ್ಟು ಹಂಚಿಕೆ",
+  "totalRemaining": "ಒಟ್ಟು ಉಳಿದಿದೆ",
+  "map": "ನಕ್ಷೆ",
+  "collect": "ಸಂಗ್ರಹಿಸಿ",
+  "load": "ಲೋಡ್ ಮಾಡಿ",
+  "language": "ಭಾಷೆ",
+  "pastTransactions": "ಹಿಂದಿನ ವ್ಯವಹಾರಗಳು",
+  "bharatGas": "ಭಾರತ್ ಗ್ಯಾಸ್",
+  "stateElectricityBoard": "ರಾಜ್ಯ ವಿದ್ಯುತ್ ಮಂಡಳಿ",
+  "municipalWaterWorks": "ಪಟ್ಟಣ ನೀರಿನ ಕೆಲಸಗಳು",
+  "localGroceries": "ಸ್ಥಳೀಯ ಕಿರಾಣಿ",
+  "payment": "ಪಾವತಿ",
+  "selectLanguage": "ಭಾಷೆ ಆಯ್ಕೆಮಾಡಿ",
+  "choosePaymentMethod": "ಪಾವತಿ ವಿಧಾನವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+  "scanQRCode": "ಕ್ಯೂಆರ್ ಕೋಡ್ ಸ್ಕ್ಯಾನ್ ಮಾಡಿ",
+  "payViaAccountId": "ಖಾತೆ ಐಡಿ ಮೂಲಕ ಪಾವತಿ ಮಾಡಿ"
+}

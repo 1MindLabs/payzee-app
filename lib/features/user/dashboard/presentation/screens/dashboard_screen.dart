@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:upi_pay/core/provider/locale_provider.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/transaction_history.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/utility_cards.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/choose_payment_option_bottom_sheet.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/confetti_card.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/widgets/language_menu.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/past_transaction_tile.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/wallet_functions.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
 }
 
-class _DashboardScreenState extends State<DashboardScreen> {
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final totalAllocated = utilityCards.fold<double>(
@@ -28,13 +32,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
     final fmt = NumberFormat.simpleCurrency(locale: 'en_IN', name: '₹');
 
+    final locale = ref.watch(localeProvider);
+
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
-        title: Text('My eRupee Wallet', style: GoogleFonts.roboto()),
+        title: Text(
+          AppLocalizations.of(context)!.appTitle,
+          style: GoogleFonts.roboto(),
+        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.volume_up, color: Colors.black),
+            icon: Icon(Icons.person, color: Colors.black),
             onPressed: () {
               // TTS for this card
             },
@@ -73,7 +82,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Column(
                     children: [
                       Text(
-                        'Total Allocated',
+                        AppLocalizations.of(context)!.totalAllocated,
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -93,7 +102,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Column(
                     children: [
                       Text(
-                        'Total Remaining',
+                        AppLocalizations.of(context)!.totalRemaining,
                         style: GoogleFonts.roboto(
                           fontSize: 14,
                           color: Colors.grey[600],
@@ -117,7 +126,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           SizedBox(
             width: MediaQuery.of(context).size.width * 0.92,
-            height: 100,
+            height: locale == Locale('kn') ? 130 : 100,
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -127,18 +136,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  WalletFunctions(icon: Icons.money, title: 'Send'),
+                  WalletFunctions(
+                    icon: Icons.pin_drop_rounded,
+                    title: AppLocalizations.of(context)!.map,
+                  ),
                   WalletFunctions(
                     icon: Icons.generating_tokens_rounded,
-                    title: 'Collect',
+                    title: AppLocalizations.of(context)!.collect,
                   ),
                   WalletFunctions(
                     icon: Icons.account_balance_wallet,
-                    title: 'Load',
+                    title: AppLocalizations.of(context)!.load,
                   ),
-                  WalletFunctions(
-                    icon: Icons.account_balance_wallet,
-                    title: 'Redeem',
+                  GestureDetector(
+                    onTap:
+                        () => showModalBottomSheet(
+                          context: context,
+                          builder: (context) => const LanguageSelectionSheet(),
+                        ),
+                    child: WalletFunctions(
+                      icon: Icons.sort_by_alpha,
+                      title: AppLocalizations.of(context)!.language,
+                    ),
                   ),
                 ],
               ),
@@ -152,7 +171,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Past Transactions',
+                AppLocalizations.of(context)!.pastTransactions,
                 style: GoogleFonts.roboto(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -180,7 +199,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           showPaymentOptions(context);
         },
         icon: Icon(Icons.payment),
-        label: Text('Payment'),
+        label: Text(AppLocalizations.of(context)!.payment),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

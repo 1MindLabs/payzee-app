@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:upi_pay/features/user/qr-scanner/presentation/screen/qr_scanner_screen.dart';
 import 'package:upi_pay/features/user/vendor-id/presentation/screen/vendor_id_screen.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 void showPaymentOptions(BuildContext context) {
   showModalBottomSheet(
@@ -25,13 +26,13 @@ void showPaymentOptions(BuildContext context) {
             ),
             SizedBox(height: 20),
             Text(
-              'Choose Payment Method',
+              AppLocalizations.of(context)!.choosePaymentMethod,
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 20),
             ListTile(
               leading: Icon(Icons.qr_code_scanner, size: 30),
-              title: Text('Scan QR Code'),
+              title: Text(AppLocalizations.of(context)!.scanQRCode),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) => QrScannerScreen(),
@@ -40,7 +41,7 @@ void showPaymentOptions(BuildContext context) {
             ),
             ListTile(
               leading: Icon(Icons.account_balance_wallet, size: 30),
-              title: Text('Pay via Account ID'),
+              title: Text(AppLocalizations.of(context)!.payViaAccountId),
               onTap: () {
                 Navigator.push(context, MaterialPageRoute(
                   builder: (context) => VendorOrIdScreen(),

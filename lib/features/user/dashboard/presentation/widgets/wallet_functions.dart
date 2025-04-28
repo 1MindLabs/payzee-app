@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:upi_pay/core/provider/locale_provider.dart';
 
-class WalletFunctions extends StatelessWidget {
+class WalletFunctions extends ConsumerWidget {
   final IconData icon;
   final String title;
   const WalletFunctions({super.key, required this.icon, required this.title});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
     return SizedBox(
       width: 80,
-      height: 80,
+      height: locale == Locale('kn') ? 105 : 80,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -21,7 +24,7 @@ class WalletFunctions extends StatelessWidget {
           ),
 
           const SizedBox(height: 8),
-          Text(title, style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold)),
+          Text(title, style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold), textAlign: TextAlign.center,),
         ],
       ),
     );
