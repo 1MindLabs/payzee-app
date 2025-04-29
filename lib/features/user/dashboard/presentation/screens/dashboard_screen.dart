@@ -73,9 +73,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       updateUtilityCards(userProfile);
     }
   }
-
+  
   @override
   Widget build(BuildContext context) {
+    final userProfile = ref.watch(userProfileProvider);
+
     final totalAllocated = utilityCards.fold<double>(
       0,
       (sum, c) => sum + c.allocated,
@@ -258,9 +260,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: pastTransactions.length,
+              itemCount: userProfile.pastTransactions.length,
               itemBuilder:
-                  (_, i) => PastTransactionTile(txn: pastTransactions[i]),
+                  (_, i) => PastTransactionTile(txn: userProfile.pastTransactions[i]),
             ),
           ),
         ],

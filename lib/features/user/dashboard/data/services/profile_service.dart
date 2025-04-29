@@ -6,7 +6,7 @@ import 'package:upi_pay/features/user/dashboard/data/models/user_profile.dart';
 
 
 class ProfileService {
-  final String baseUrl = 'http://192.168.34.94:8000/api/v1/user/balance/eLuQDhF68Nbw7znZlo75';
+  final String baseUrl = 'http://192.168.34.94:8000/api/v1/user/eLuQDhF68Nbw7znZlo75';
 
   Future<UserProfile?> fetchUserProfile() async {
     try{

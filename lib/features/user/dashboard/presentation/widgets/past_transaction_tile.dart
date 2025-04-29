@@ -9,7 +9,7 @@ class PastTransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('dd MMM').format(txn.date);
+    final dateStr = DateFormat('dd MMM').format(DateTime.parse(txn.date));
     final amtStr = NumberFormat.simpleCurrency(
       locale: 'en_IN',
       name: '₹',
@@ -22,14 +22,14 @@ class PastTransactionTile extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: Colors.black,
-          child: Icon(Icons.receipt_long, color: Colors.white),
+          child: const Icon(Icons.receipt_long, color: Colors.white),
         ),
         title: Text(
-          txn.merchant,
+          txn.shopName, // <-- updated field
           style: GoogleFonts.roboto(fontWeight: FontWeight.w500),
         ),
         subtitle: Text(
-          '${txn.utility} • $dateStr',
+          '${txn.category} • $dateStr', // <-- updated field
           style: GoogleFonts.roboto(fontSize: 12),
         ),
         trailing: Text(
