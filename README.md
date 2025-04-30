@@ -1,4 +1,4 @@
-# upi_pay
+# PayZee
 
 A new Flutter project.
 
