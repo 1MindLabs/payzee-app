@@ -19,5 +19,6 @@
   "selectLanguage": "Select Language",
   "choosePaymentMethod": "Choose Payment Method",
   "scanQRCode": "Scan QR Code",
-  "payViaAccountId": "Pay via Account ID"
+  "payViaAccountId": "Pay via Account ID",
+  "chat": "Chatbot"
 }

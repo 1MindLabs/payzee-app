@@ -1,73 +1,134 @@
-import 'dart:convert';
-
 class SchemeModel {
   final String id;
-  final String schemeId;
-  final String schemeName;
+  final String name;
   final String description;
-  final List<String> tags;
-  final String status;
-  final EligibilityCriteria eligibilityCriteria;
   final double amount;
-  final DateTime createdAt;
+  final String? govtId;
+  final EligibilityCriteria eligibilityCriteria;
+  final EligibilityCheck? eligibilityCheck;
+  final bool eligible;
+  final bool? alreadyEnrolled;
 
   SchemeModel({
     required this.id,
-    required this.schemeId,
-    required this.schemeName,
+    required this.name,
     required this.description,
-    required this.tags,
-    required this.status,
-    required this.eligibilityCriteria,
     required this.amount,
-    required this.createdAt,
+    this.govtId,
+    required this.eligibilityCriteria,
+    this.eligibilityCheck,
+    required this.eligible,
+    this.alreadyEnrolled,
   });
 
   factory SchemeModel.fromJson(Map<String, dynamic> json) {
     return SchemeModel(
       id: json['id'] as String,
-      schemeId: json['scheme_id'] as String,
-      schemeName: json['scheme_name'] as String,
+      name: json['name'] as String,
       description: json['description'] as String,
-      tags: List<String>.from(json['tags'] as List),
-      status: json['status'] as String,
+      amount: (json['amount'] as num).toDouble(),
+      govtId: json['govt_id'] as String?,
       eligibilityCriteria: EligibilityCriteria.fromJson(
         json['eligibility_criteria'] as Map<String, dynamic>,
       ),
-      amount: (json['amount'] as num).toDouble(),
-      createdAt: DateTime.parse(json['created_at'] as String),
+      eligibilityCheck: json['eligibility_check'] != null
+          ? EligibilityCheck.fromJson(json['eligibility_check'] as Map<String, dynamic>)
+          : null,
+      eligible: json['eligible'] as bool,
+      alreadyEnrolled: json['already_enrolled'] as bool?,
     );
   }
 }
 
 class EligibilityCriteria {
-  final String? district;
-  final String? dateOfBirth;
-  final String? caste;
-  final String? city;
-  final String? gender;
-  final String? state;
+  final String occupation;
+  final int minAge;
+  final int maxAge;
+  final String gender;
+  final String state;
+  final String district;
+  final String city;
+  final String caste;
+  final int annualIncome;
 
   EligibilityCriteria({
-    this.district,
-    this.dateOfBirth,
-    this.caste,
-    this.city,
-    this.gender,
-    this.state,
+    required this.occupation,
+    required this.minAge,
+    required this.maxAge,
+    required this.gender,
+    required this.state,
+    required this.district,
+    required this.city,
+    required this.caste,
+    required this.annualIncome,
   });
 
   factory EligibilityCriteria.fromJson(Map<String, dynamic> json) {
     return EligibilityCriteria(
-      district: json['district'] as String?,
-      dateOfBirth: json['date_of_birth'] as String?,
-      caste: json['caste'] as String?,
-      city: json['city'] as String?,
-      gender: json['gender'] as String?,
-      state: json['state'] as String?,
+      occupation: json['occupation'] as String,
+      minAge: json['min_age'] as int,
+      maxAge: json['max_age'] as int,
+      gender: json['gender'] as String,
+      state: json['state'] as String,
+      district: json['district'] as String,
+      city: json['city'] as String,
+      caste: json['caste'] as String,
+      annualIncome: json['annual_income'] as int,
     );
   }
 }
 
+class EligibilityCheck {
+  final EligibilityCheckItem occupation;
+  final EligibilityCheckItem gender;
+  final EligibilityCheckItem caste;
+  final EligibilityCheckItem annualIncome;
+  final EligibilityCheckItem age;
+  final EligibilityCheckItem state;
+  final EligibilityCheckItem district;
+  final EligibilityCheckItem city;
 
-/// lib/features/user/dashboard/data/providers/scheme_provider.dart
+  EligibilityCheck({
+    required this.occupation,
+    required this.gender,
+    required this.caste,
+    required this.annualIncome,
+    required this.age,
+    required this.state,
+    required this.district,
+    required this.city,
+  });
+
+  factory EligibilityCheck.fromJson(Map<String, dynamic> json) {
+    return EligibilityCheck(
+      occupation: EligibilityCheckItem.fromJson(json['occupation'] as Map<String, dynamic>),
+      gender: EligibilityCheckItem.fromJson(json['gender'] as Map<String, dynamic>),
+      caste: EligibilityCheckItem.fromJson(json['caste'] as Map<String, dynamic>),
+      annualIncome: EligibilityCheckItem.fromJson(json['annual_income'] as Map<String, dynamic>),
+      age: EligibilityCheckItem.fromJson(json['age'] as Map<String, dynamic>),
+      state: EligibilityCheckItem.fromJson(json['state'] as Map<String, dynamic>),
+      district: EligibilityCheckItem.fromJson(json['district'] as Map<String, dynamic>),
+      city: EligibilityCheckItem.fromJson(json['city'] as Map<String, dynamic>),
+    );
+  }
+}
+
+class EligibilityCheckItem {
+  final String required;
+  final dynamic actual;
+  final bool passed;
+
+  EligibilityCheckItem({
+    required this.required,
+    required this.actual,
+    required this.passed,
+  });
+
+  factory EligibilityCheckItem.fromJson(Map<String, dynamic> json) {
+    return EligibilityCheckItem(
+      required: json['required'],
+      actual: json['actual'],
+      passed: json['passed'] as bool,
+    );
+  }
+}

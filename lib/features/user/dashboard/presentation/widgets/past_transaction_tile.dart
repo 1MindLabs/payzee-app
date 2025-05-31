@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-import 'package:upi_pay/features/user/dashboard/data/models/past_transaction.dart';
+import 'package:upi_pay/features/user/dashboard/data/models/citizen_transaction.dart';
 
 class PastTransactionTile extends StatelessWidget {
-  final PastTransaction txn;
-  const PastTransactionTile({required this.txn, super.key});
+  final CitizenTransaction txn;
+
+  const PastTransactionTile({
+    super.key,
+    required this.txn,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final dateStr = DateFormat('dd MMM').format(DateTime.parse(txn.date));
+    final dateStr = DateFormat('dd MMM').format(txn.timestamp);
     final amtStr = NumberFormat.simpleCurrency(
       locale: 'en_IN',
       name: '₹',
     ).format(txn.amount);
+
+    // Determine direction and color
+
+    final Color amountColor = txn.txType == 'government-to-citizen' ? Colors.green : Colors.red;
+    final IconData icon = txn.txType == 'government-to-citizen' ? Icons.call_received : Icons.call_made;
+    final String typeLabel = txn.txType == 'government-to-citizen'
+        ? 'Govt Transfer'
+        : 'Purchase';
 
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6),
@@ -21,22 +33,22 @@ class PastTransactionTile extends StatelessWidget {
       elevation: 1,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.black,
-          child: const Icon(Icons.receipt_long, color: Colors.white),
+          backgroundColor: txn.txType == 'government-to-citizen' ? Colors.green : Colors.red,
+          child: Icon(icon, color: Colors.white),
         ),
         title: Text(
-          txn.shopName, // <-- updated field
+          txn.description,
           style: GoogleFonts.roboto(fontWeight: FontWeight.w500),
         ),
         subtitle: Text(
-          '${txn.category} • $dateStr', // <-- updated field
+          '$typeLabel • $dateStr',
           style: GoogleFonts.roboto(fontSize: 12),
         ),
         trailing: Text(
-          amtStr,
+          txn.txType == 'government-to-citizen' ? '+$amtStr' : '-$amtStr',
           style: GoogleFonts.roboto(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: amountColor,
           ),
         ),
       ),

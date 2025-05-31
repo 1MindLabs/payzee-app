@@ -19,5 +19,6 @@
   "selectLanguage": "भाषा चुनें",
   "choosePaymentMethod": "भुगतान विधि चुनें",
   "scanQRCode": "क्यूआर कोड स्कैन करें",
-  "payViaAccountId": "खाते आईडी से भुगतान करें"
+  "payViaAccountId": "खाते आईडी से भुगतान करें",
+  "chat": "चैटबॉट"
 }

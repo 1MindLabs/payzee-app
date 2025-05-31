@@ -1,17 +1,23 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:upi_pay/features/auth/model/citizen_signup.dart';
+import 'package:upi_pay/features/auth/presentation/providers/citizen_provider.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignupScreen extends ConsumerStatefulWidget {
+  const SignupScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignupScreenState extends ConsumerState<SignupScreen> {
+  final _passwordController = TextEditingController();
   final _aadharController = TextEditingController();
   final _nameController = TextEditingController();
   final _businessNameController = TextEditingController();
@@ -26,6 +32,11 @@ class _LoginScreenState extends State<LoginScreen> {
   final String _hardcodedAadhar = "7561 6481 3006";
 
   final ImagePicker _picker = ImagePicker();
+  @override
+  void initState() {
+    super.initState();
+    setCitizenId(); // Example: Setting the citizen ID during initialization
+  }
 
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.camera);
@@ -40,10 +51,40 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
+  Future<void> setCitizenId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('citizenId', '51998947-49d0-4b16-80ce-a1ffd2c91995');
+    log('Citizen ID set: ${prefs.getString('citizenId')}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Sign Up'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.deepPurple),
+        actions: [
+          TextButton(
+            onPressed: () {
+              context.go(
+                '/login',
+              ); // Replace '/login' with the actual route for your login page
+            },
+            child: const Text(
+              'Log in',
+              style: TextStyle(
+                color: Colors.deepPurple,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -224,8 +265,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 42,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(28),
-                  onTap: () {
+                  onTap: () async {
                     if (_role == 'User') {
+                      CitizenSignup citizen = CitizenSignup(
+                        name: _nameController.text,
+                        password: _passwordController.text,
+                        aadharNumber: _aadharController.text,
+                      );
+
+                      await ref
+                          .read(citizenProvider.notifier)
+                          .citizenSignup(citizen);
+
+                      // if (ref.watch(citizenProvider) != null) {
+                      //   context.go('/user/dashboard');
+                      // } else {
+                      //   ScaffoldMessenger.of(context).showSnackBar(
+                      //     const SnackBar(content: Text('Failed to sign up')),
+                      //   );
+                      // }
                       context.go('/user/dashboard');
                     } else {
                       context.go('/vendor/dashboard');
@@ -411,6 +469,15 @@ class _LoginScreenState extends State<LoginScreen> {
             label: 'Full Name',
             prefixIcon: Icons.person_outline,
             textInputType: TextInputType.name,
+          ),
+
+          const SizedBox(height: 20),
+
+          _buildTextField(
+            controller: _passwordController,
+            label: 'Password',
+            prefixIcon: Icons.lock_outline,
+            textInputType: TextInputType.visiblePassword,
           ),
 
           const SizedBox(height: 20),

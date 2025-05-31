@@ -61,11 +61,11 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
     }
   }
 
-  Color getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
+  Color getStatusColor(bool status) {
+    switch (status) {
+      case true:
         return Colors.green;
-      case 'inactive':
+      case false:
         return Colors.grey;
       default:
         return Colors.grey;
@@ -177,7 +177,7 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
           const SizedBox(height: 20),
           Text(
             selectedScheme != null
-                ? selectedScheme!.schemeName
+                ? selectedScheme!.name
                 : 'Available Balance',
             style: TextStyle(
               color: Colors.white.withOpacity(0.8),
@@ -248,7 +248,7 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
             itemBuilder: (context, index) {
               final scheme = schemesList[index];
               final isSelected = selectedScheme?.id == scheme.id;
-              final statusColor = getStatusColor(scheme.status);
+              final statusColor = getStatusColor(scheme.eligible);
 
               return GestureDetector(
                 onTap: () {
@@ -282,7 +282,7 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              scheme.schemeName,
+                              scheme.name,
                               style: TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
@@ -352,7 +352,7 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        selectedScheme!.schemeName,
+                        selectedScheme!.name,
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 16,
@@ -365,11 +365,11 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: getStatusColor(selectedScheme!.status),
+                          color: getStatusColor(selectedScheme!.eligible),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          selectedScheme!.status.toUpperCase(),
+                          selectedScheme!.eligible ? 'ELIGIBLE' : 'NOT ELIGIBLE',
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 10,
@@ -385,31 +385,7 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
                     style: TextStyle(color: Colors.teal.shade700),
                   ),
                   const SizedBox(height: 16),
-                  // Tags
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children:
-                        selectedScheme!.tags.map((tag) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.teal.shade100,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              tag,
-                              style: TextStyle(
-                                color: Colors.teal.shade800,
-                                fontSize: 12,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                  ),
+                  
                   const SizedBox(height: 16),
                   // Eligibility criteria
                   Text(
@@ -421,10 +397,26 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Display non-null eligibility criteria
+                  // Display eligibility criteria
                   _buildEligibilityCriteria(
                     selectedScheme!.eligibilityCriteria,
                   ),
+                  
+                  if (selectedScheme!.eligibilityCheck != null) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Your Eligibility Check',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        color: Colors.teal.shade800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildEligibilityCheckResults(
+                      selectedScheme!.eligibilityCheck!,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -517,40 +509,77 @@ class _WalletSummaryScreenState extends ConsumerState<WalletSummaryScreen> {
   }
 
   Widget _buildEligibilityCriteria(EligibilityCriteria criteria) {
-    final Map<String, String?> criteriaMap = {
-      'District': criteria.district,
-      'Date of Birth': criteria.dateOfBirth,
-      'Caste': criteria.caste,
-      'City': criteria.city,
+    final Map<String, dynamic> criteriaMap = {
+      'Occupation': criteria.occupation,
+      'Age Range': '${criteria.minAge} - ${criteria.maxAge} years',
       'Gender': criteria.gender,
       'State': criteria.state,
+      'District': criteria.district,
+      'City': criteria.city,
+      'Caste': criteria.caste,
+      'Annual Income': '≤ ₹${criteria.annualIncome}',
     };
-
-    // Filter out null values
-    final nonNullCriteria =
-        criteriaMap.entries.where((entry) => entry.value != null).toList();
-
-    if (nonNullCriteria.isEmpty) {
-      return const Text('No specific eligibility criteria');
-    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children:
-          nonNullCriteria.map((entry) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 4),
-              child: Row(
-                children: [
-                  Text(
-                    '${entry.key}: ',
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                  ),
-                  Text(entry.value ?? ''),
-                ],
+      children: criteriaMap.entries.map((entry) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(
+            children: [
+              Text(
+                '${entry.key}: ',
+                style: const TextStyle(fontWeight: FontWeight.w500),
               ),
-            );
-          }).toList(),
+              Text(entry.value.toString()),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildEligibilityCheckResults(EligibilityCheck check) {
+    final checkResults = [
+      {'name': 'Occupation', 'check': check.occupation},
+      {'name': 'Gender', 'check': check.gender},
+      {'name': 'Caste', 'check': check.caste},
+      {'name': 'Annual Income', 'check': check.annualIncome},
+      {'name': 'Age', 'check': check.age},
+      {'name': 'State', 'check': check.state},
+      {'name': 'District', 'check': check.district},
+      {'name': 'City', 'check': check.city},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: checkResults.map((item) {
+        final EligibilityCheckItem checkItem = item['check'] as EligibilityCheckItem;
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 4),
+          child: Row(
+            children: [
+              Text(
+                '${item['name']}: ',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    Text('${checkItem.actual}'),
+                    const SizedBox(width: 8),
+                    Icon(
+                      checkItem.passed ? Icons.check_circle : Icons.cancel,
+                      color: checkItem.passed ? Colors.green : Colors.red,
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
     );
   }
 

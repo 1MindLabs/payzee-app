@@ -2,21 +2,31 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:upi_pay/core/provider/locale_provider.dart';
+import 'package:upi_pay/features/user/chat/view/screen/audio_recorder_screen.dart';
+import 'package:upi_pay/features/user/chat/view/screen/audio_screen.dart';
+import 'package:upi_pay/features/user/chat/view/screen/chat_screen.dart';
 import 'package:upi_pay/features/user/dashboard/data/mock/utility_cards.dart';
+import 'package:upi_pay/features/user/dashboard/data/models/citizen_profile.dart';
+import 'package:upi_pay/features/user/dashboard/data/models/citizen_transaction.dart';
 import 'package:upi_pay/features/user/dashboard/data/models/user_profile.dart';
 import 'package:upi_pay/features/user/dashboard/data/services/profile_service.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/providers/citizen_profile_provider.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/providers/citizen_transaction_provider.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/providers/user_profile_provider.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/screens/map_screen.dart';
+import 'package:upi_pay/features/user/dashboard/presentation/screens/transaction_details_screen.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/screens/wallet_summary_screen.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/choose_payment_option_bottom_sheet.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/confetti_card.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/language_menu.dart';
 import 'package:upi_pay/features/user/dashboard/presentation/widgets/past_transaction_tile.dart';
-import 'package:upi_pay/features/user/dashboard/presentation/widgets/wallet_functions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:upi_pay/features/user/profile/user_profile_screen.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -30,10 +40,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   final PageController _pageController = PageController(viewportFraction: 0.88);
   int _currentPage = 0;
 
+  List<CitizenTransaction> transactions = [];
+
   @override
   void initState() {
     super.initState();
-    loadProfile();
+    // loadProfile();
+    // setCitizenId();
+    loadCitizenProfile();
+    loadTransactions();
     _pageController.addListener(() {
       int next = _pageController.page!.round();
       if (_currentPage != next) {
@@ -48,6 +63,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> setCitizenId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('citizenId', '51998947-49d0-4b16-80ce-a1ffd2c91995');
+    log('Citizen ID set: ${prefs.getString('citizenId')}');
   }
 
   void updateUtilityCards(UserProfile userProfile) {
@@ -77,6 +98,53 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     setState(() {});
   }
 
+  void updateNewUtilityCards(CitizenProfile citizenProfile) {
+    final govtCardIndex = 0;
+    if (govtCardIndex == 0) {
+      utilityCards[govtCardIndex] = utilityCards[0].copyWith(
+        allocated:
+            double.tryParse(
+              citizenProfile.walletInfo.govtWallet.balance.toString(),
+            ) ??
+            0,
+        remaining:
+            double.tryParse(
+              citizenProfile.walletInfo.govtWallet.balance.toString(),
+            ) ??
+            0,
+      );
+    }
+
+    final personalCardIndex = 1;
+    if (personalCardIndex == 1) {
+      utilityCards[personalCardIndex] = utilityCards[personalCardIndex]
+          .copyWith(
+            allocated:
+                double.tryParse(
+                  citizenProfile.walletInfo.personalWallet.balance.toString(),
+                ) ??
+                0,
+            remaining:
+                double.tryParse(
+                  citizenProfile.walletInfo.personalWallet.balance.toString(),
+                ) ??
+                0,
+          );
+    }
+    setState(() {});
+  }
+
+  Future<void> loadCitizenProfile() async {
+    await ref.read(citizenProfileProvider.notifier).getCitizenProfile();
+
+    final citizenProfile = ref.watch(citizenProfileProvider);
+    log('Citizen profile fetched in screen: $citizenProfile');
+
+    if (citizenProfile != null) {
+      updateNewUtilityCards(citizenProfile);
+    }
+  }
+
   Future<void> loadProfile() async {
     await ref
         .read(userProfileProvider.notifier)
@@ -87,6 +155,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (userProfile != null) {
       updateUtilityCards(userProfile);
     }
+  }
+
+  Future<void> loadTransactions() async {
+    await ref.read(citizenTransactionProvider.notifier).getCitizenTransaction();
+    transactions = ref.watch(citizenTransactionProvider);
+    log('Transactions fetched in screen: $transactions');
+    for (var txn in transactions) {
+      log('Transaction: ${txn.toJson()}');
+    }
+    setState(() {});
   }
 
   @override
@@ -158,7 +236,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           ),
                           if (userProfile != null)
                             Text(
-                              "Hello, ${userProfile.userId}",
+                              "Hello, ${ref.watch(citizenProfileProvider).accountInfo.name}",
                               style: GoogleFonts.poppins(
                                 fontSize: 16,
                                 color: Colors.grey[600],
@@ -166,13 +244,42 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             ),
                         ],
                       ),
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: primaryColor.withOpacity(0.2),
-                        child: Icon(
-                          Icons.person,
-                          color: primaryColor,
-                          size: 28,
+                      Spacer(),
+                      GestureDetector(
+                        onTap:
+                            () => showModalBottomSheet(
+                              context: context,
+                              builder:
+                                  (context) => const LanguageSelectionSheet(),
+                              isScrollControlled: true,
+                            ),
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: primaryColor.withOpacity(0.2),
+                          child: Icon(
+                            Icons.translate,
+                            color: primaryColor,
+                            size: 28,
+                          ),
+                        ),
+                      ),
+                      Gap(10),
+                      GestureDetector(
+                        onTap:
+                            () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const UserProfileScreen(),
+                              ),
+                            ),
+                        child: CircleAvatar(
+                          radius: 24,
+                          backgroundColor: primaryColor.withOpacity(0.2),
+                          child: Icon(
+                            Icons.person,
+                            color: primaryColor,
+                            size: 28,
+                          ),
                         ),
                       ),
                     ],
@@ -348,17 +455,29 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                             color: Color(0xFF2196F3),
                             onTap: () {},
                           ),
+                          // ActionItem(
+                          //   icon: Icons.translate,
+                          //   title: AppLocalizations.of(context)!.language,
+                          //   color: Color(0xFF9C27B0),
+                          //   onTap:
+                          //       () => showModalBottomSheet(
+                          //         context: context,
+                          //         builder:
+                          //             (context) =>
+                          //                 const LanguageSelectionSheet(),
+                          //         isScrollControlled: true,
+                          //       ),
+                          // ),
                           ActionItem(
-                            icon: Icons.translate,
-                            title: AppLocalizations.of(context)!.language,
+                            icon: Icons.message,
+                            title: AppLocalizations.of(context)!.chat,
                             color: Color(0xFF9C27B0),
                             onTap:
-                                () => showModalBottomSheet(
-                                  context: context,
-                                  builder:
-                                      (context) =>
-                                          const LanguageSelectionSheet(),
-                                  isScrollControlled: true,
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const AudioScreen(),
+                                  ),
                                 ),
                           ),
                         ],
@@ -404,10 +523,17 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       shrinkWrap: true, // Add this
                       physics: NeverScrollableScrollPhysics(),
                       padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: userProfile.pastTransactions.length,
+                      itemCount: transactions.length,
                       itemBuilder:
-                          (_, i) => PastTransactionTile(
-                            txn: userProfile.pastTransactions[i],
+                          (_, i) => GestureDetector(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    TransactionDetailScreen(transaction: transactions[i]),
+                              ),
+                            ),
+                            child: PastTransactionTile(txn: transactions[i]),
                           ),
                     ),
 
